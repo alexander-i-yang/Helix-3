@@ -301,8 +301,8 @@ const skills = {
     1: {
       data: {
         background: "#5ed0c9",
-        //TODO: come up with something for this
-        title: "???",
+        title: "Bigger hand",
+        description: "You can hold more unused cards at once",
       },
     },
   },
@@ -779,14 +779,19 @@ const ExpCounter = props => {
 
 const MapSpace = props => {
   let className = "space";
+  const controlled = props.data["controlled"];
   if(props.data["playerSpace"]) className += " playerSpace";
   if(props.data["clicked"]) className += " clicked";
+  if(controlled) className += " controlled";
   return(
     <div
       className={className}
-      onClick={props.onClick}
-      >
-      <Icon name={props.data["iconName"]} />
+      onClick={props.onClick} >
+      {
+        controlled
+          ? <Icon name = {props.data["iconName"]} />
+          : <span>{props.data["stat"]}</span>
+      }
     </div>
   );
 };
@@ -805,10 +810,13 @@ class Map extends React.Component {
         const iconLevel = Math.floor(Math.random()*10);
         let icon = cards[iconSkill%2===0 ? "A" : "D"];
         icon = icon[iconLevel===0 ? 1 : 0]["name"];
-        console.log(icon);
+        const stat = iconSkill*Math.floor(Math.random()*5)+1;
         const space = {
           playerSpace: playerSpace,
+          controlled: playerSpace,
           iconName: icon,
+          iconCode: iconSkill+iconLevel,
+          stat: stat,
         };
         row.push(space);
       }
@@ -820,10 +828,41 @@ class Map extends React.Component {
     }
   }
 
+  checkAdjacent(curRow, curCol, nextRow, nextCol, thisRowSpaces, nextRowSpaces) {
+    if(curRow === nextRow) {
+      if(Math.abs(curCol-nextCol) === 1) return true;
+    } else if (Math.abs(curRow-nextRow) === 1) {
+      console.log(curCol, nextCol);
+      if(curCol === nextCol || curCol-thisRowSpaces+nextRowSpaces === nextCol) return true;
+    }
+    return false;
+  }
+
   spaceClick(row, col) {
     let spaces = this.state.spaces;
     const space = spaces[row][col];
-    const data = {clicked: true}
+    let playerRow = 0;
+    let playerCol = 0;
+    let rowInd = 0;
+    spaces.map(row => {
+      let colInd = 0;
+      row.map(col => {
+        if(col["playerSpace"]) {
+          playerRow = rowInd;
+          playerCol = colInd;
+          col["playerSpace"]=false;
+          return;
+        }
+        col["playerSpace"]=false;
+        colInd++;
+      });
+      rowInd++;
+    });
+    if(!this.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
+      spaces[playerRow][playerCol]["playerSpace"] = true;
+      return;
+    }
+    const data = {playerSpace: true, controlled: true,}
     Object.assign(space, data);
     spaces[row][col] = space;
     this.setState({spaces: spaces});

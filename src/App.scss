@@ -74,8 +74,7 @@ body {
   }
   & .body {
     font-size: 18px;
-    margin: 20px;
-    margin-top: 10px;
+    margin: 10px 20px 20px;
     height: 100%;
     display: flex; flex-direction: column;
     justify-content: space-between;
@@ -176,17 +175,25 @@ button {
     display: flex;
     justify-content:center;
     & .space {
-      padding: 30px;
+      width: 90px; height: 90px;
       display: flex;
+      justify-content: center;
+      align-items: center;
       border-radius: 100px;
       background: #ffffff10;
       margin: 0 5px 0 4px;
       cursor: pointer;
       transition: all 0.3s;
-      &.clicked {background: #ffffff20;}
+      &:hover {transform: scale(1.05);}
+      /*&.clicked {background: #ffffff20;}*/
+      & span {display: flex;}
+      &.controlled {
+        background: #6fa8dc20;
+      }
       &.playerSpace {
-        background: #cfcfff30;
-        &.clicked {background: #c0c0ff28;}
+        background: #6fa8dc;
+        z-index: 1;
+        box-shadow: 0 0 15px 0 #6fa8dca0;
       }
     }
   }
