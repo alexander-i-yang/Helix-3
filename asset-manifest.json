@@ -1,16 +1,15 @@
 {
   "files": {
     "main.css": "/Helix-3/static/css/main.88ee0c84.chunk.css",
-    "main.js": "/Helix-3/static/js/main.8dc5ee95.chunk.js",
-    "main.js.map": "/Helix-3/static/js/main.8dc5ee95.chunk.js.map",
+    "main.js": "/Helix-3/static/js/main.a3745411.chunk.js",
+    "main.js.map": "/Helix-3/static/js/main.a3745411.chunk.js.map",
     "runtime~main.js": "/Helix-3/static/js/runtime~main.65ef2eef.js",
     "runtime~main.js.map": "/Helix-3/static/js/runtime~main.65ef2eef.js.map",
-    "static/js/2.fcfad392.chunk.js": "/Helix-3/static/js/2.fcfad392.chunk.js",
-    "static/js/2.fcfad392.chunk.js.map": "/Helix-3/static/js/2.fcfad392.chunk.js.map",
+    "static/js/2.188531e5.chunk.js": "/Helix-3/static/js/2.188531e5.chunk.js",
+    "static/js/2.188531e5.chunk.js.map": "/Helix-3/static/js/2.188531e5.chunk.js.map",
     "index.html": "/Helix-3/index.html",
-    "precache-manifest.0a378aef84c8726f3f98b802e4db720c.js": "/Helix-3/precache-manifest.0a378aef84c8726f3f98b802e4db720c.js",
+    "precache-manifest.87a2a43cf86feeaf21d7124dc8bc91e3.js": "/Helix-3/precache-manifest.87a2a43cf86feeaf21d7124dc8bc91e3.js",
     "service-worker.js": "/Helix-3/service-worker.js",
-    "static/css/main.88ee0c84.chunk.css.map": "/Helix-3/static/css/main.88ee0c84.chunk.css.map",
-    "static/media/logo.svg": "/Helix-3/static/media/logo.5d5d9eef.svg"
+    "static/css/main.88ee0c84.chunk.css.map": "/Helix-3/static/css/main.88ee0c84.chunk.css.map"
   }
 }
