@@ -807,10 +807,10 @@ class Map extends React.Component {
       for(let j = 0; j<cellsNum; ++j) {
         const playerSpace = i===rows-1 && j===(cellsNum-1)/2;
         const iconSkill = Math.floor(Math.random()*2);
-        const iconLevel = Math.floor(Math.random()*10);
+        const iconLevel = Math.floor(Math.random()*8);
         let icon = cards[iconSkill%2===0 ? "A" : "D"];
         icon = icon[iconLevel===0 ? 1 : 0]["name"];
-        const stat = iconSkill*Math.floor(Math.random()*5)+1;
+        const stat = (iconLevel===0 ? 1 : 0)*5+3;
         const space = {
           playerSpace: playerSpace,
           controlled: playerSpace,
@@ -858,6 +858,13 @@ class Map extends React.Component {
       });
       rowInd++;
     });
+    // console.log(this.props.stats[0], )
+    let attack = this.props.stats[0];
+    attack = attack>this.props.stats[2] ? this.props.stats[2] : attack;
+    if(attack <= space["stat"]) {
+      spaces[playerRow][playerCol]["playerSpace"] = true;
+      return;
+    }
     if(!this.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
       spaces[playerRow][playerCol]["playerSpace"] = true;
       return;
@@ -910,7 +917,9 @@ const NavWindows = props => {
       onGroupDelete={props.onGroupDelete}
       setPoints={setCardStats}
       incrXP={props.incrXP} />,
-    <Map />
+    <Map
+      stats={props.stats}
+      />
   ];
   const rets = [];
   let index = 0;
@@ -977,6 +986,7 @@ const App = () => {
           incrXP={incrXP}
           skillList={skillList}
           setSkills={setSkills}
+          stats={statsState}
           setPoints={setStats}/>
       </div>
       <div className="bottom">
