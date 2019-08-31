@@ -786,6 +786,7 @@ const MapSpace = props => {
       className={className}
       onClick={props.onClick}
       >
+      <Icon name={props.data["iconName"]} />
     </div>
   );
 };
@@ -800,8 +801,14 @@ class Map extends React.Component {
       const row = [];
       for(let j = 0; j<cellsNum; ++j) {
         const playerSpace = i===rows-1 && j===(cellsNum-1)/2;
+        const iconSkill = Math.floor(Math.random()*2);
+        const iconLevel = Math.floor(Math.random()*10);
+        let icon = cards[iconSkill%2===0 ? "A" : "D"];
+        icon = icon[iconLevel===0 ? 1 : 0]["name"];
+        console.log(icon);
         const space = {
           playerSpace: playerSpace,
+          iconName: icon,
         };
         row.push(space);
       }

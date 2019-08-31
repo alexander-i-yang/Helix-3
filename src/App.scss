@@ -176,16 +176,17 @@ button {
     display: flex;
     justify-content:center;
     & .space {
-      height: 70px;
-      width: 70px;
+      padding: 30px;
+      display: flex;
       border-radius: 100px;
       background: #ffffff10;
       margin: 0 5px 0 4px;
       cursor: pointer;
-      &.clicked {background: #a0a0ff10;}
+      transition: all 0.3s;
+      &.clicked {background: #ffffff20;}
       &.playerSpace {
-        background: #ffffff20;
-        &.clicked {background: #a0a0ff20;}
+        background: #cfcfff30;
+        &.clicked {background: #c0c0ff28;}
       }
     }
   }
