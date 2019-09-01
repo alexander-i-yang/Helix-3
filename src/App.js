@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {Component} from 'react';
 import './App.scss';
-import {classBody} from "@babel/types";
 //import {shield} from './images/shield.svg';
 
 const cards = {
@@ -471,39 +470,60 @@ const Cards = (props) => {
   return(<>{items}</>);
 };
 
-const Stats = (props) => {
-  const maxStat = props.stat[props.pos+2];
-  const curStat = props.stat[props.pos];
-  const name = props.name;
-  const iconName = name==="attack" ? "sword" : "shield";
-  return (
-    <div>
-      <Icon name={iconName}/>
-      {utils.range(0, maxStat-1).map(statNum => {
-        let key = "A";
-        if(name === "defense") key = "U";
-        const style = {
-          background: statNum < curStat
-            ? combos[key]["background"]
-            : "darkgray",
-        };
-        return (
-          <div key={statNum}
-            className="statPoint"
-            style={style}>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+class Stats extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {timer: null};
+  }
+
+  componentWillUnmount() {
+    if(this.state.timer) clearTimeout(this.state.timer);
+  }
+
+  render() {
+    const maxStat = this.props.stat[this.props.pos + 2];
+    const curStat = this.props.stat[this.props.pos];
+    const name = this.props.name;
+    const iconName = name === "attack" ? "sword" : "shield";
+
+    const shake = this.props.isStatShake;
+    if(shake) {
+      const timeOut = setTimeout(() => {
+        this.props.setStatsShake(false);
+        this.setState({timer: timeOut});
+        console.log(timeOut);
+      }, 900);
+    }
+
+    return (
+        <div className={shake ? "shake" : ""}>
+          <Icon name={iconName}/>
+          {utils.range(0, maxStat - 1).map(statNum => {
+            let key = "A";
+            if (name === "defense") key = "U";
+            const style = {
+              background: statNum < curStat
+                  ? shake ? "red" : combos[key]["background"]
+                  : "darkgray",
+            };
+            return (
+                <div key={statNum}
+                     className="statPoint"
+                     style={style}>
+                </div>
+            );
+          })}
+        </div>
+    );
+  }
+}
 
 function toSkill(symbol) {return(symbol.charAt(0));}
 function toLevel(symbol) {return(parseInt(symbol.charAt(1)));}
 function toScale(level) {return(1+level*0.1);}
 
 const CardDraw = (props) => {
-  const [cards, setCards] = React.useState(props.cards);
+  const cards = props.cards;
   return (
     utils.range(0, cards.length-1).map((cardId) => {
       const symbol = cards[cardId];
@@ -512,7 +532,7 @@ const CardDraw = (props) => {
           key={cardId}
           skill={toSkill(symbol)}
           level={toLevel(symbol)}
-          onClick={() => props.onClick(symbol)}/>
+          onClick={() => {props.onClick(cardId);}}/>
       );
     })
   );
@@ -592,16 +612,18 @@ const Icon = (props) => {
     return(<svg className="icon fillRed" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m569.3285 79.34744l0 0c0.8331909 -39.247963 33.32544 -71.74195 72.5733 -72.577354l247.03607 -5.2582135l0 0c18.847534 -0.40117323 36.76416 6.7012396 49.80841 19.74479c13.0442505 13.0435505 20.147705 30.959776 19.747559 49.807312l-5.234558 246.56346c-0.83325195 39.247955 -33.32544 71.74194 -72.573364 72.57736l-247.03607 5.258209c-39.247925 0.8353882 -70.38916 -30.304138 -69.55591 -69.55209z" fillRule="evenodd"/><path fill="#000000" d="m68.036476 620.4278l0 0c18.74289 -18.742859 49.131126 -18.742859 67.874016 0l203.65353 203.65356c9.000671 9.00061 14.05719 21.20813 14.05719 33.93701c0 12.728821 -5.0565186 24.93634 -14.05719 33.93701l0 0l0 0c-18.74289 18.742859 -49.131104 18.742859 -67.87399 0l-203.65356 -203.65356l0 0c-18.74289 -18.74292 -18.74289 -49.131104 0 -67.87402z" fillRule="evenodd"/><path fill="#000000" d="m696.80835 127.4225l0 0c13.710205 -13.710236 35.938904 -13.710236 49.64917 0l86.13037 86.13039l0 0c6.5838623 6.5838776 10.282654 15.51355 10.282654 24.82457c0 9.31102 -3.6987915 18.240677 -10.282654 24.82457l-458.69733 458.69733c-13.710236 13.710205 -35.938904 13.710205 -49.64914 0l-86.13039 -86.13037c-13.710236 -13.710266 -13.710236 -35.938965 0 -49.64917z" fillRule="evenodd"/><path fill="#000000" d="m117.161255 741.01013l0 0c10.281883 -10.28186 26.952103 -10.28186 37.23398 0l64.59279 64.59277l0 0c4.937546 4.937561 7.7114105 11.634277 7.7114105 18.617004c0 6.982727 -2.7738647 13.679443 -7.7114105 18.617004l-98.54554 98.54553c-10.281883 10.28186 -26.952103 10.28186 -37.23398 0l-64.5928 -64.59277c-10.281879 -10.28186 -10.281879 -26.952087 0 -37.23401z" fillRule="evenodd"/><path fill="#000000" d="m685.3738 138.85611l-452.7874 452.78738l351.0866 -554.48816z" fillRule="evenodd"/><path fill="#000000" d="m822.7756 272.98212l-454.42517 454.42517l556.126 -352.72437z" fillRule="evenodd"/><path fill="#000000" d="m88.20685 696.51733l0 0l0 0c-11.616348 -3.1134033 -21.520134 -10.713867 -27.532623 -21.129395c-6.012493 -10.415466 -7.6411896 -22.792847 -4.527794 -34.40918l25.816124 -96.32214c1.0681152E-4 -3.6621094E-4 5.187988E-4 -6.1035156E-4 9.2315674E-4 -4.8828125E-4l87.59806 23.478638l0 0c3.9672852E-4 1.2207031E-4 6.4086914E-4 5.493164E-4 5.340576E-4 9.765625E-4l-25.81665 96.32117l0 0c-6.483322 24.189758 -31.348785 38.5437 -55.538574 32.060425z" fillRule="evenodd"/><path fill="#000000" d="m128.83295 439.7784l0 0l0 0c4.641449 1.2472534 8.598541 4.287567 11.000748 8.452118c2.4022064 4.1645203 3.052765 9.112122 1.808548 13.754395l-24.867378 92.78229c-4.5776367E-5 1.8310547E-4 -2.0599365E-4 2.4414062E-4 -3.6621094E-4 2.4414062E-4l-35.000885 -9.405884l0 0c-1.6021729E-4 0 -2.593994E-4 -1.8310547E-4 -2.1362305E-4 -3.6621094E-4l24.867592 -92.78189l0 0c2.59095 -9.667053 12.526619 -15.398193 22.191956 -12.800903z" fillRule="evenodd"/><path fill="#000000" d="m112.421875 559.4723l14.083199 -52.545593l9.270409 58.80481z" fillRule="evenodd"/><path fill="#000000" d="m119.59811 439.5718l0 0l0 0c4.6421585 -1.2420349 9.588402 -0.58935547 13.750618 1.8144836c4.162216 2.4038696 7.199463 6.3619385 8.443573 11.003571l28.190659 105.17569c2.5907135 9.665588 -3.1455688 19.5979 -12.812363 22.184326l0 0l0 0c-9.666794 2.5864868 -19.60347 -3.1523438 -22.194183 -12.817993l-28.190659 -105.17569l0 0c-2.5907211 -9.665649 3.1455688 -19.59793 12.812355 -22.184387z" fillRule="evenodd"/><path fill="#000000" d="m261.24744 872.63556l0 0l0 0c3.1134033 11.616333 10.713867 21.52008 21.129364 27.532593c10.415497 6.012512 22.792877 7.6411743 34.40921 4.527771l96.32211 -25.816101c3.9672852E-4 -1.2207031E-4 6.4086914E-4 -4.8828125E-4 5.493164E-4 -9.1552734E-4l-23.478699 -87.59808l0 0c-1.2207031E-4 -3.6621094E-4 -5.187988E-4 -6.1035156E-4 -9.460449E-4 -4.8828125E-4l-96.32117 25.81665l0 0c-24.189789 6.4832764 -38.54373 31.348755 -32.060425 55.538574z" fillRule="evenodd"/><path fill="#000000" d="m517.9863 832.00946l0 0l0 0c-1.2472534 -4.6414795 -4.2875366 -8.598572 -8.452087 -11.000793c-4.1645203 -2.4022217 -9.112152 -3.0527344 -13.754425 -1.8085327l-92.78226 24.86737c-1.8310547E-4 6.1035156E-5 -2.746582E-4 2.4414062E-4 -2.1362305E-4 3.6621094E-4l9.405823 35.000916l0 0c3.0517578E-5 1.2207031E-4 2.1362305E-4 2.4414062E-4 3.6621094E-4 1.8310547E-4l92.78192 -24.867554l0 0c9.667023 -2.5910034 15.398163 -12.526672 12.800873 -22.191956z" fillRule="evenodd"/><path fill="#000000" d="m398.29248 848.42053l52.545593 -14.083252l-58.80481 -9.270386z" fillRule="evenodd"/><path fill="#000000" d="m518.19293 841.24426l0 0l0 0c1.2420654 -4.642151 0.58935547 -9.588379 -1.8144531 -13.75061c-2.4038696 -4.1622314 -6.361969 -7.199463 -11.003571 -8.4435425l-105.17566 -28.190674c-9.665649 -2.5906982 -19.59793 3.1455688 -22.184387 12.812378l0 0l0 0c-2.5864258 9.666748 3.1523743 19.603455 12.818024 22.194153l105.17569 28.190674l0 0c9.665649 2.5906982 19.59793 -3.1455688 22.184357 -12.812378z" fillRule="evenodd"/></g></svg>);
   } else if(props.name === "spike sword") {
     return(
-      <svg className="icon" xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m682.91486 56.631527l0 0c0.5883789 -27.541315 23.392029 -50.34174 50.93341 -50.92617l173.36615 -3.6788568l0 0c13.225891 -0.28065455 25.79779 4.704117 34.950073 13.857721c9.152283 9.1536045 14.135254 21.726227 13.852722 34.95203l-3.696106 173.01999c-0.5883789 27.54132 -23.392029 50.341736 -50.93347 50.926178l-173.36609 3.6788635c-27.541443 0.5844116 -49.391174 -21.268463 -48.802795 -48.80977z" fillRule="evenodd"/><path fill="#000000" d="m65.08449 621.38556l0 0c18.74289 -18.742859 49.13112 -18.742859 67.87401 0l203.65353 203.65356c9.000671 9.000671 14.05719 21.20819 14.05719 33.93701c0 12.728821 -5.0565186 24.93634 -14.05719 33.93701l0 0l0 0c-18.74289 18.742859 -49.131104 18.742859 -67.87399 0l-203.65355 -203.65356l0 0c-18.742893 -18.742859 -18.742893 -49.131104 0 -67.87402z" fillRule="evenodd"/><path fill="#000000" d="m773.90045 48.33622l0 0c13.710266 -13.710232 35.938904 -13.710232 49.64917 0l86.13037 86.13038l0 0c6.5838623 6.583893 10.282654 15.51355 10.282654 24.82457c0 9.31102 -3.6987915 18.240692 -10.282654 24.824585l-538.7288 538.72876c-13.710236 13.710266 -35.938904 13.710266 -49.64914 0l-86.13039 -86.13037c-13.710236 -13.710205 -13.710236 -35.938904 0 -49.64917z" fillRule="evenodd"/><path fill="#000000" d="m114.20927 741.9679l0 0c10.281876 -10.28186 26.952095 -10.28186 37.23397 0l64.592804 64.592834l0 0c4.9375305 4.9375 7.7114105 11.634216 7.7114105 18.616943c0 6.982727 -2.77388 13.679504 -7.7114105 18.617004l-98.545555 98.54553c-10.281876 10.281921 -26.952095 10.281921 -37.23398 0l-64.59279 -64.59277c-10.281879 -10.28186 -10.281879 -26.952087 0 -37.233948z" fillRule="evenodd"/><path fill="#000000" d="m751.1114 79.55638l-517.2599 517.2598l462.11026 -572.4094z" fillRule="evenodd"/><path fill="#000000" d="m884.28076 204.72485l-521.2598 521.2598l575.68506 -466.83463z" fillRule="evenodd"/><path fill="#000000" d="m85.17173 697.5066l0 0l0 0c-11.616348 -3.1149902 -21.519493 -10.71698 -27.53086 -21.133606c-6.011368 -10.416626 -7.6385384 -22.794617 -4.523548 -34.41101l25.829319 -96.32208c1.0681152E-4 -4.272461E-4 5.187988E-4 -6.1035156E-4 9.2315674E-4 -5.493164E-4l87.59806 23.490723l0 0c3.9672852E-4 1.2207031E-4 6.4086914E-4 4.8828125E-4 5.340576E-4 9.1552734E-4l-25.82985 96.32117l0 0c-6.4866333 24.18982 -31.354782 38.541077 -55.54458 32.054443z" fillRule="evenodd"/><path fill="#000000" d="m125.83204 440.76407l0 0l0 0c4.6414566 1.2478943 8.5982895 4.2888184 11.000053 8.453796c2.401764 4.164978 3.051712 9.112854 1.8068542 13.755127l-24.880096 92.78226c-3.8146973E-5 1.8310547E-4 -2.0599365E-4 3.0517578E-4 -3.6621094E-4 2.4414062E-4l-35.000885 -9.410645l0 0c-1.6021729E-4 -6.1035156E-5 -2.5177002E-4 -1.8310547E-4 -2.1362305E-4 -3.6621094E-4l24.88031 -92.78192l0 0c2.59227 -9.667023 12.529015 -15.397125 22.194344 -12.798492z" fillRule="evenodd"/><path fill="#000000" d="m109.40511 560.45996l14.090401 -52.545624l9.263199 58.808014z" fillRule="evenodd"/><path fill="#000000" d="m116.59692 440.5563l0 0l0 0c4.642479 -1.2415161 9.588806 -0.5881653 13.750862 1.8162842c4.1620483 2.40448 7.1988983 6.363098 8.442444 11.005005l28.178177 105.18289c2.5895844 9.666321 -3.148178 19.598206 -12.815628 22.183472l0 0l0 0c-9.66745 2.5853271 -19.60373 -3.1549683 -22.193314 -12.821289l-28.17817 -105.18289l0 0c-2.5895767 -9.66629 3.148178 -19.598175 12.815628 -22.183472z" fillRule="evenodd"/><path fill="#000000" d="m258.26398 873.67645l0 0l0 0c3.1149902 11.616333 10.71698 21.51947 21.133606 27.530823c10.416626 6.0114136 22.794617 7.63855 34.41095 4.5235596l96.32211 -25.829285c3.9672852E-4 -1.2207031E-4 6.4086914E-4 -5.493164E-4 5.493164E-4 -9.765625E-4l-23.490723 -87.59802l0 0c-9.1552734E-5 -4.272461E-4 -5.187988E-4 -6.713867E-4 -9.1552734E-4 -5.493164E-4l-96.32117 25.829834l0 0c-24.189789 6.4866333 -38.541046 31.354797 -32.054413 55.544617z" fillRule="evenodd"/><path fill="#000000" d="m515.0065 833.0161l0 0l0 0c-1.2478638 -4.6414185 -4.2888184 -8.598267 -8.453796 -11.000061c-4.164978 -2.4017334 -9.112854 -3.0516968 -13.755127 -1.8068237l-92.78229 24.880066c-1.5258789E-4 6.1035156E-5 -2.4414062E-4 2.4414062E-4 -1.8310547E-4 3.6621094E-4l9.410614 35.000916l0 0c6.1035156E-5 1.2207031E-4 2.1362305E-4 2.4414062E-4 3.6621094E-4 1.8310547E-4l92.78192 -24.88031l0 0c9.667023 -2.5922241 15.397125 -12.528992 12.798492 -22.194336z" fillRule="evenodd"/><path fill="#000000" d="m395.3106 849.44305l52.545593 -14.090393l-58.808014 -9.263184z" fillRule="evenodd"/><path fill="#000000" d="m515.21423 842.2512l0 0l0 0c1.2415161 -4.642456 0.5881958 -9.588806 -1.8162842 -13.7508545c-2.4044495 -4.1620483 -6.3630676 -7.1988525 -11.005005 -8.442444l-105.18289 -28.178162c-9.66629 -2.5895996 -19.598175 3.1481934 -22.183472 12.815613l0 0l0 0c-2.5852966 9.66748 3.1549988 19.60376 12.821289 22.19336l105.18289 28.178162l0 0c9.666321 2.5895386 19.598206 -3.1481934 22.183472 -12.815674z" fillRule="evenodd"/><path fill="#000000" d="m688.24536 95.89444l-96.8504 96.8504l0 -193.70079z" fillRule="evenodd"/><path fill="#000000" d="m538.6858 283.55243l-96.8504 96.85037l0 -193.70078z" fillRule="evenodd"/><path fill="#000000" d="m393.0385 475.12268l-96.8504 96.8504l0 -193.7008z" fillRule="evenodd"/><path fill="#000000" d="m866.10406 277.73965l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/><path fill="#000000" d="m678.4461 427.29926l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/><path fill="#000000" d="m486.87585 572.94653l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/></g></svg>
+      <svg className="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m682.91486 56.631527l0 0c0.5883789 -27.541315 23.392029 -50.34174 50.93341 -50.92617l173.36615 -3.6788568l0 0c13.225891 -0.28065455 25.79779 4.704117 34.950073 13.857721c9.152283 9.1536045 14.135254 21.726227 13.852722 34.95203l-3.696106 173.01999c-0.5883789 27.54132 -23.392029 50.341736 -50.93347 50.926178l-173.36609 3.6788635c-27.541443 0.5844116 -49.391174 -21.268463 -48.802795 -48.80977z" fillRule="evenodd"/><path fill="#000000" d="m65.08449 621.38556l0 0c18.74289 -18.742859 49.13112 -18.742859 67.87401 0l203.65353 203.65356c9.000671 9.000671 14.05719 21.20819 14.05719 33.93701c0 12.728821 -5.0565186 24.93634 -14.05719 33.93701l0 0l0 0c-18.74289 18.742859 -49.131104 18.742859 -67.87399 0l-203.65355 -203.65356l0 0c-18.742893 -18.742859 -18.742893 -49.131104 0 -67.87402z" fillRule="evenodd"/><path fill="#000000" d="m773.90045 48.33622l0 0c13.710266 -13.710232 35.938904 -13.710232 49.64917 0l86.13037 86.13038l0 0c6.5838623 6.583893 10.282654 15.51355 10.282654 24.82457c0 9.31102 -3.6987915 18.240692 -10.282654 24.824585l-538.7288 538.72876c-13.710236 13.710266 -35.938904 13.710266 -49.64914 0l-86.13039 -86.13037c-13.710236 -13.710205 -13.710236 -35.938904 0 -49.64917z" fillRule="evenodd"/><path fill="#000000" d="m114.20927 741.9679l0 0c10.281876 -10.28186 26.952095 -10.28186 37.23397 0l64.592804 64.592834l0 0c4.9375305 4.9375 7.7114105 11.634216 7.7114105 18.616943c0 6.982727 -2.77388 13.679504 -7.7114105 18.617004l-98.545555 98.54553c-10.281876 10.281921 -26.952095 10.281921 -37.23398 0l-64.59279 -64.59277c-10.281879 -10.28186 -10.281879 -26.952087 0 -37.233948z" fillRule="evenodd"/><path fill="#000000" d="m751.1114 79.55638l-517.2599 517.2598l462.11026 -572.4094z" fillRule="evenodd"/><path fill="#000000" d="m884.28076 204.72485l-521.2598 521.2598l575.68506 -466.83463z" fillRule="evenodd"/><path fill="#000000" d="m85.17173 697.5066l0 0l0 0c-11.616348 -3.1149902 -21.519493 -10.71698 -27.53086 -21.133606c-6.011368 -10.416626 -7.6385384 -22.794617 -4.523548 -34.41101l25.829319 -96.32208c1.0681152E-4 -4.272461E-4 5.187988E-4 -6.1035156E-4 9.2315674E-4 -5.493164E-4l87.59806 23.490723l0 0c3.9672852E-4 1.2207031E-4 6.4086914E-4 4.8828125E-4 5.340576E-4 9.1552734E-4l-25.82985 96.32117l0 0c-6.4866333 24.18982 -31.354782 38.541077 -55.54458 32.054443z" fillRule="evenodd"/><path fill="#000000" d="m125.83204 440.76407l0 0l0 0c4.6414566 1.2478943 8.5982895 4.2888184 11.000053 8.453796c2.401764 4.164978 3.051712 9.112854 1.8068542 13.755127l-24.880096 92.78226c-3.8146973E-5 1.8310547E-4 -2.0599365E-4 3.0517578E-4 -3.6621094E-4 2.4414062E-4l-35.000885 -9.410645l0 0c-1.6021729E-4 -6.1035156E-5 -2.5177002E-4 -1.8310547E-4 -2.1362305E-4 -3.6621094E-4l24.88031 -92.78192l0 0c2.59227 -9.667023 12.529015 -15.397125 22.194344 -12.798492z" fillRule="evenodd"/><path fill="#000000" d="m109.40511 560.45996l14.090401 -52.545624l9.263199 58.808014z" fillRule="evenodd"/><path fill="#000000" d="m116.59692 440.5563l0 0l0 0c4.642479 -1.2415161 9.588806 -0.5881653 13.750862 1.8162842c4.1620483 2.40448 7.1988983 6.363098 8.442444 11.005005l28.178177 105.18289c2.5895844 9.666321 -3.148178 19.598206 -12.815628 22.183472l0 0l0 0c-9.66745 2.5853271 -19.60373 -3.1549683 -22.193314 -12.821289l-28.17817 -105.18289l0 0c-2.5895767 -9.66629 3.148178 -19.598175 12.815628 -22.183472z" fillRule="evenodd"/><path fill="#000000" d="m258.26398 873.67645l0 0l0 0c3.1149902 11.616333 10.71698 21.51947 21.133606 27.530823c10.416626 6.0114136 22.794617 7.63855 34.41095 4.5235596l96.32211 -25.829285c3.9672852E-4 -1.2207031E-4 6.4086914E-4 -5.493164E-4 5.493164E-4 -9.765625E-4l-23.490723 -87.59802l0 0c-9.1552734E-5 -4.272461E-4 -5.187988E-4 -6.713867E-4 -9.1552734E-4 -5.493164E-4l-96.32117 25.829834l0 0c-24.189789 6.4866333 -38.541046 31.354797 -32.054413 55.544617z" fillRule="evenodd"/><path fill="#000000" d="m515.0065 833.0161l0 0l0 0c-1.2478638 -4.6414185 -4.2888184 -8.598267 -8.453796 -11.000061c-4.164978 -2.4017334 -9.112854 -3.0516968 -13.755127 -1.8068237l-92.78229 24.880066c-1.5258789E-4 6.1035156E-5 -2.4414062E-4 2.4414062E-4 -1.8310547E-4 3.6621094E-4l9.410614 35.000916l0 0c6.1035156E-5 1.2207031E-4 2.1362305E-4 2.4414062E-4 3.6621094E-4 1.8310547E-4l92.78192 -24.88031l0 0c9.667023 -2.5922241 15.397125 -12.528992 12.798492 -22.194336z" fillRule="evenodd"/><path fill="#000000" d="m395.3106 849.44305l52.545593 -14.090393l-58.808014 -9.263184z" fillRule="evenodd"/><path fill="#000000" d="m515.21423 842.2512l0 0l0 0c1.2415161 -4.642456 0.5881958 -9.588806 -1.8162842 -13.7508545c-2.4044495 -4.1620483 -6.3630676 -7.1988525 -11.005005 -8.442444l-105.18289 -28.178162c-9.66629 -2.5895996 -19.598175 3.1481934 -22.183472 12.815613l0 0l0 0c-2.5852966 9.66748 3.1549988 19.60376 12.821289 22.19336l105.18289 28.178162l0 0c9.666321 2.5895386 19.598206 -3.1481934 22.183472 -12.815674z" fillRule="evenodd"/><path fill="#000000" d="m688.24536 95.89444l-96.8504 96.8504l0 -193.70079z" fillRule="evenodd"/><path fill="#000000" d="m538.6858 283.55243l-96.8504 96.85037l0 -193.70078z" fillRule="evenodd"/><path fill="#000000" d="m393.0385 475.12268l-96.8504 96.8504l0 -193.7008z" fillRule="evenodd"/><path fill="#000000" d="m866.10406 277.73965l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/><path fill="#000000" d="m678.4461 427.29926l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/><path fill="#000000" d="m486.87585 572.94653l-96.8504 96.8504l193.7008 0z" fillRule="evenodd"/></g></svg>
     );
   } else if(props.name==="three shield") {
     return(
-      <svg className="icon threeShield" xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m119.03545 166.15492l360.0 0l0 288.09448l-360.0 0z" fillRule="evenodd"/><path fill="#000000" d="m479.08777 933.74805c-95.50867 0.018432617 -187.10846 -50.567566 -254.63646 -140.62317c-67.527985 -90.05554 -105.448944 -212.19885 -105.41573 -339.54376l359.99997 0.16690063z" fillRule="evenodd"/><path fill="#000000" d="m121.06166 180.16568l0 0c-8.57563 -32.006424 10.418411 -64.906044 42.424377 -73.48337l299.4347 -80.245865c15.369812 -4.118973 31.746063 -1.9635258 45.526123 5.9921722c13.78006 7.9556923 23.835236 21.059948 27.9534 36.429977l0 0l0 0c8.575623 32.006424 -10.418457 64.90604 -42.424408 73.48337l-299.4347 80.245865c-32.005966 8.577316 -64.903854 -10.415726 -73.47949 -42.42215z" fillRule="evenodd"/><path fill="#000000" d="m357.1374 141.01706l121.921265 0l0 225.00787l-121.921265 0z" fillRule="evenodd"/><path fill="#000000" d="m479.05908 526.2493l0 408.0l-97.7323 -408.0z" fillRule="evenodd"/><path fill="#000000" d="m780.9344 511.6824l0 0c33.137085 0 60.002075 -26.862915 60.00464 -60.0l0.022216797 -286.96063c0.0012207031 -15.912979 -6.319031 -31.174225 -17.570312 -42.4264c-11.251343 -11.252182 -26.512085 -17.573593 -42.42505 -17.573593l0 0l0 0c-33.137085 0 -60.002075 26.862907 -60.00464 59.999992l-0.022216797 286.96063c-0.0025634766 33.137085 26.858276 60.0 59.99536 60.0z" fillRule="evenodd"/><path fill="#000000" d="m477.63705 933.731c96.05789 1.0792236 188.45193 -49.07379 256.62595 -139.30072c68.17395 -90.22699 106.4729 -213.04364 106.375854 -341.12524l-120.01672 0.14767456l0 0c0.05883789 96.11606 -25.509094 188.27219 -71.00891 255.94162c-45.499817 67.66943 -107.152466 105.23187 -171.22556 104.32068z" fillRule="evenodd"/><path fill="#000000" d="m838.93835 178.16656l0 0c8.575623 -32.006424 -10.418945 -64.90406 -42.4256 -73.47893l-296.50317 -79.43586c-15.370117 -4.117794 -31.746674 -1.961216 -45.526978 5.9953136c-13.780304 7.9565315 -23.83554 21.061253 -27.953705 36.43128l0 0l0 0c-8.575653 32.006424 10.418915 64.90406 42.425568 73.47892l296.50317 79.43587c32.006653 8.57486 64.90509 -10.420181 73.48071 -42.42659z" fillRule="evenodd"/></g></svg>
+      <svg className="icon threeShield" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m119.03545 166.15492l360.0 0l0 288.09448l-360.0 0z" fillRule="evenodd"/><path fill="#000000" d="m479.08777 933.74805c-95.50867 0.018432617 -187.10846 -50.567566 -254.63646 -140.62317c-67.527985 -90.05554 -105.448944 -212.19885 -105.41573 -339.54376l359.99997 0.16690063z" fillRule="evenodd"/><path fill="#000000" d="m121.06166 180.16568l0 0c-8.57563 -32.006424 10.418411 -64.906044 42.424377 -73.48337l299.4347 -80.245865c15.369812 -4.118973 31.746063 -1.9635258 45.526123 5.9921722c13.78006 7.9556923 23.835236 21.059948 27.9534 36.429977l0 0l0 0c8.575623 32.006424 -10.418457 64.90604 -42.424408 73.48337l-299.4347 80.245865c-32.005966 8.577316 -64.903854 -10.415726 -73.47949 -42.42215z" fillRule="evenodd"/><path fill="#000000" d="m357.1374 141.01706l121.921265 0l0 225.00787l-121.921265 0z" fillRule="evenodd"/><path fill="#000000" d="m479.05908 526.2493l0 408.0l-97.7323 -408.0z" fillRule="evenodd"/><path fill="#000000" d="m780.9344 511.6824l0 0c33.137085 0 60.002075 -26.862915 60.00464 -60.0l0.022216797 -286.96063c0.0012207031 -15.912979 -6.319031 -31.174225 -17.570312 -42.4264c-11.251343 -11.252182 -26.512085 -17.573593 -42.42505 -17.573593l0 0l0 0c-33.137085 0 -60.002075 26.862907 -60.00464 59.999992l-0.022216797 286.96063c-0.0025634766 33.137085 26.858276 60.0 59.99536 60.0z" fillRule="evenodd"/><path fill="#000000" d="m477.63705 933.731c96.05789 1.0792236 188.45193 -49.07379 256.62595 -139.30072c68.17395 -90.22699 106.4729 -213.04364 106.375854 -341.12524l-120.01672 0.14767456l0 0c0.05883789 96.11606 -25.509094 188.27219 -71.00891 255.94162c-45.499817 67.66943 -107.152466 105.23187 -171.22556 104.32068z" fillRule="evenodd"/><path fill="#000000" d="m838.93835 178.16656l0 0c8.575623 -32.006424 -10.418945 -64.90406 -42.4256 -73.47893l-296.50317 -79.43586c-15.370117 -4.117794 -31.746674 -1.961216 -45.526978 5.9953136c-13.780304 7.9565315 -23.83554 21.061253 -27.953705 36.43128l0 0l0 0c-8.575653 32.006424 10.418915 64.90406 42.425568 73.47892l296.50317 79.43587c32.006653 8.57486 64.90509 -10.420181 73.48071 -42.42659z" fillRule="evenodd"/></g></svg>
     );
   } else if(props.name==="more cards 1") {
     return(
-      <svg className="icon" xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 -0.012477165l141.86237 0l0 0c28.966125 0 56.74591 11.506758 77.22809 31.988918c20.482117 20.482159 31.988892 48.261932 31.988892 77.22808l0 294.69897l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 959.9872l141.86237 0l0 0c28.966125 0 56.74591 -11.506775 77.22809 -31.988953c20.482117 -20.482117 31.988892 -48.2619 31.988892 -77.22803l0 -294.69904l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 -0.012477165l-141.8623 0l0 0c-28.966156 0 -56.74594 11.506758 -77.22809 31.988918c-20.482162 20.482159 -31.988922 48.261932 -31.988922 77.22808l0 294.69897l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 959.9872l-141.8623 0l0 0c-28.966156 0 -56.74594 -11.506775 -77.22809 -31.988953c-20.482162 -20.482117 -31.988922 -48.2619 -31.988922 -77.22803l0 -294.69904l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m152.89337 384.85135l99.02493 0l0 225.13022l-99.02493 0z" fillRule="evenodd"/><path fill="#000000" d="m708.0815 384.85135l99.02496 0l0 225.13022l-99.02496 0z" fillRule="evenodd"/><path fill="#000000" d="m350.1201 708.3137l272.38095 0l0 251.69843l-272.38095 0z" fillRule="evenodd"/><path fill="#000000" d="m365.9591 -0.012477165l218.55322 0l0 251.6984l-218.55322 0z" fillRule="evenodd"/></g></svg>
+      <svg className="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 -0.012477165l141.86237 0l0 0c28.966125 0 56.74591 11.506758 77.22809 31.988918c20.482117 20.482159 31.988892 48.261932 31.988892 77.22808l0 294.69897l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 959.9872l141.86237 0l0 0c28.966125 0 56.74591 -11.506775 77.22809 -31.988953c20.482117 -20.482117 31.988892 -48.2619 31.988892 -77.22803l0 -294.69904l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 -0.012477165l-141.8623 0l0 0c-28.966156 0 -56.74594 11.506758 -77.22809 31.988918c-20.482162 20.482159 -31.988922 48.261932 -31.988922 77.22808l0 294.69897l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 959.9872l-141.8623 0l0 0c-28.966156 0 -56.74594 -11.506775 -77.22809 -31.988953c-20.482162 -20.482117 -31.988922 -48.2619 -31.988922 -77.22803l0 -294.69904l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m152.89337 384.85135l99.02493 0l0 225.13022l-99.02493 0z" fillRule="evenodd"/><path fill="#000000" d="m708.0815 384.85135l99.02496 0l0 225.13022l-99.02496 0z" fillRule="evenodd"/><path fill="#000000" d="m350.1201 708.3137l272.38095 0l0 251.69843l-272.38095 0z" fillRule="evenodd"/><path fill="#000000" d="m365.9591 -0.012477165l218.55322 0l0 251.6984l-218.55322 0z" fillRule="evenodd"/></g></svg>
     );
+  } else if(props.name==="upgrade") {
+    return(<svg class="icon" mlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m192.0 408.00012l288.0 -288.0l288.0 288.0l-136.05121 0l0 432.0l-303.89758 0l0 -432.0z" fillRule="evenodd"/></g></svg>);
   } else {
     return("Icon: " + props.name);
   }
@@ -777,23 +799,70 @@ const ExpCounter = props => {
   );
 };
 
-const MapSpace = props => {
-  let className = "space";
-  const controlled = props.data["controlled"];
-  if(props.data["playerSpace"]) className += " playerSpace";
-  if(props.data["clicked"]) className += " clicked";
-  if(controlled) className += " controlled";
-  return(
-    <div
-      className={className}
-      onClick={props.onClick} >
-      {
-        controlled
-          ? <Icon name = {props.data["iconName"]} />
-          : <span>{props.data["stat"]}</span>
-      }
-    </div>
-  );
+class MapSpace extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      timer: null,
+      hovered: false,
+    }
+  }
+
+  componentWillUnmount() {
+    if(this.state.timer) clearTimeout(this.state.timer);
+  }
+
+  onHover(obj) {
+    obj.setState({
+      hovered: true,
+    });
+  }
+
+  onUnHover(obj) {
+    obj.setState({
+      hovered: false,
+    });
+  }
+
+  render() {
+    let className = "space";
+    const data = this.props.data;
+    const controlled = data["controlled"];
+    if(data["playerSpace"]) className += " playerSpace";
+    if(data["clicked"]) className += " clicked";
+    if(data["adjacent"]) className += " adjacent";
+    if(data["shake"]) {
+      className += " shake";
+      this.props.statsShake();
+      const timer = setTimeout(() => {
+        data["shake"] = false;
+        this.setState({timer: timer});
+      }, 900);
+    }
+    if(controlled) className += " controlled";
+    return(
+      <div
+        className={className}
+        onMouseOver={() => {this.onHover(this);}}
+        onMouseOut={() => {this.onUnHover(this);}}
+        onClick={this.props.onClick} >
+        <button
+            onClick={this.props.upgradeClick}
+            style={{
+              visibility: this.state.hovered && controlled
+                  ? "visible"
+                  : "hidden"
+            }}>
+          <Icon name="upgrade" />
+        </button>
+        {
+          controlled
+            ? <Icon name = {data["iconName"]} />
+            : <span>{data["stat"]}</span>
+        }
+      </div>
+    );
+  }
 };
 
 class Map extends React.Component {
@@ -801,21 +870,23 @@ class Map extends React.Component {
     super(props);
     let spaces = [];
     const rows = 5;
+    const playerRow = rows-1;
+    const playerCol = (rows-Math.abs(rows-2))/2;
     for(let i = 0; i<rows; ++i) {
       const cellsNum = -1*Math.abs(i-2)+rows;
       const row = [];
       for(let j = 0; j<cellsNum; ++j) {
-        const playerSpace = i===rows-1 && j===(cellsNum-1)/2;
+        const playerSpace = i===playerRow && j===playerCol;
         const iconSkill = Math.floor(Math.random()*2);
         const iconLevel = Math.floor(Math.random()*8);
         let icon = cards[iconSkill%2===0 ? "A" : "D"];
         icon = icon[iconLevel===0 ? 1 : 0]["name"];
-        const stat = (iconLevel===0 ? 1 : 0)*5+3;
+        const stat = playerSpace ? 3 : Math.floor(Math.random()*2) + (iconLevel===0 ? 1 : 0)*5+3;
         const space = {
           playerSpace: playerSpace,
           controlled: playerSpace,
           iconName: icon,
-          iconCode: iconSkill+iconLevel,
+          iconCode: (iconSkill%2===0 ? "A" : "D") + (iconLevel===0 ? "1" : "0"),
           stat: stat,
         };
         row.push(space);
@@ -838,6 +909,34 @@ class Map extends React.Component {
     return false;
   }
 
+  concatControlled() {
+    let rets = [];
+    this.state.spaces.map(row => {
+      row.map(col => {
+        if(col["controlled"]) {
+          rets.push(col["iconCode"]);
+        }
+      });
+    });
+    console.log("in map: ", rets);
+    this.props.concatDraw(rets);
+  }
+
+  upgradeClick(row, col) {
+    let spaces = this.state.spaces;
+    const space = spaces[row][col];
+    const lastLevel = toLevel(space["iconCode"]);
+    const skill = toSkill(space["iconCode"]);
+    if(lastLevel+1 >= Object.keys(cards[skill]).length) return;
+    const data = {
+      iconCode: skill+(lastLevel+1),
+      iconName: cards[skill][lastLevel+1]["name"],
+    };
+    Object.assign(space, data);
+    spaces[row][col] = space;
+    this.setState({spaces: spaces});
+  }
+
   spaceClick(row, col) {
     let spaces = this.state.spaces;
     const space = spaces[row][col];
@@ -858,20 +957,22 @@ class Map extends React.Component {
       });
       rowInd++;
     });
-    // console.log(this.props.stats[0], )
     let attack = this.props.stats[0];
     attack = attack>this.props.stats[2] ? this.props.stats[2] : attack;
-    if(attack <= space["stat"]) {
+    if(!this.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
       spaces[playerRow][playerCol]["playerSpace"] = true;
       return;
     }
-    if(!this.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
+    if(attack < space["stat"]) {
       spaces[playerRow][playerCol]["playerSpace"] = true;
+      spaces[row][col]["shake"] = true;
+      this.setState({spaces: spaces});
       return;
     }
     const data = {playerSpace: true, controlled: true,}
     Object.assign(space, data);
     spaces[row][col] = space;
+    this.concatControlled();
     this.setState({spaces: spaces});
   }
 
@@ -887,8 +988,10 @@ class Map extends React.Component {
         obRow.push(
           <MapSpace
             onClick={() => {this.spaceClick(rowConst, colConst);}}
+            statsShake={this.props.statsShake}
             key={(rowInd+1)*(colInd+1)}
             data={col}
+            upgradeClick={() => {this.upgradeClick(rowConst, colConst);}}
             />
         );
         colInd++;
@@ -919,6 +1022,8 @@ const NavWindows = props => {
       incrXP={props.incrXP} />,
     <Map
       stats={props.stats}
+      statsShake={props.statsShake}
+      concatDraw={props.concatDraw}
       />
   ];
   const rets = [];
@@ -946,14 +1051,26 @@ const App = () => {
   const [curTab, setTab] = React.useState("map");
   const [skillList, setSkills] = React.useState([]);
   const [xp, setXP] = React.useState(0);
+  const [isStatShake, setStatsShake] = React.useState(false);
 
   const incrXP = incr => {
     const newXP = xp+incr;
     setXP(newXP);
   };
-  const onDrawClick = (symbol) => {
-    const newCardList = cardList.concat(symbol);
+  const onDrawClick = (index) => {
+    const newCardList = cardList.concat(drawCards[index]);
+    let newDrawCards = drawCards;
+    console.log("before: ", newDrawCards, index);
+    newDrawCards.splice(index, 1);
+    console.log("after: ", newDrawCards);
     setCardList(newCardList);
+    setDraw(newDrawCards);
+  };
+  const concatDraw = (symbol) => {
+    let newDraw = drawCards;
+    newDraw = newDraw.concat(symbol);
+    console.log("in app: ", symbol, newDraw);
+    setDraw(newDraw);
   };
   const onGroupDelete = (index, symbol) => {
     let temp = [...cardList];
@@ -971,6 +1088,11 @@ const App = () => {
     });
     setStatsState(temp);
   };
+
+  const statsShake = () => {
+    setStatsShake(true);
+  };
+
   return(
     <>
       <div className="top">
@@ -983,15 +1105,18 @@ const App = () => {
           cardList={cardList}
           onGroupDelete={onGroupDelete}
           xp={xp}
+          statsShake={statsShake}
           incrXP={incrXP}
           skillList={skillList}
           setSkills={setSkills}
           stats={statsState}
-          setPoints={setStats}/>
+          setPoints={setStats}
+          concatDraw={(symbols) => concatDraw(symbols)}
+        />
       </div>
       <div className="bottom">
         <div className="stats">
-          <Stats name="attack" stat={statsState} pos={0}/>
+          <Stats name="attack" stat={statsState} isStatShake={isStatShake} setStatsShake={setStatsShake} pos={0}/>
           <Stats name="defense" stat={statsState} pos={1} />
         </div>
         <div className="draw">
