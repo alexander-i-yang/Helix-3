@@ -491,7 +491,6 @@ class Stats extends Component {
       const timeOut = setTimeout(() => {
         this.props.setStatsShake(false);
         this.setState({timer: timeOut});
-        console.log(timeOut);
       }, 900);
     }
 
@@ -623,7 +622,7 @@ const Icon = (props) => {
       <svg className="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 -0.012477165l141.86237 0l0 0c28.966125 0 56.74591 11.506758 77.22809 31.988918c20.482117 20.482159 31.988892 48.261932 31.988892 77.22808l0 294.69897l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m556.0063 959.9872l141.86237 0l0 0c28.966125 0 56.74591 -11.506775 77.22809 -31.988953c20.482117 -20.482117 31.988892 -48.2619 31.988892 -77.22803l0 -294.69904l-251.07935 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 -0.012477165l-141.8623 0l0 0c-28.966156 0 -56.74594 11.506758 -77.22809 31.988918c-20.482162 20.482159 -31.988922 48.261932 -31.988922 77.22808l0 294.69897l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m403.9727 959.9872l-141.8623 0l0 0c-28.966156 0 -56.74594 -11.506775 -77.22809 -31.988953c-20.482162 -20.482117 -31.988922 -48.2619 -31.988922 -77.22803l0 -294.69904l251.07932 0z" fillRule="evenodd"/><path fill="#000000" d="m152.89337 384.85135l99.02493 0l0 225.13022l-99.02493 0z" fillRule="evenodd"/><path fill="#000000" d="m708.0815 384.85135l99.02496 0l0 225.13022l-99.02496 0z" fillRule="evenodd"/><path fill="#000000" d="m350.1201 708.3137l272.38095 0l0 251.69843l-272.38095 0z" fillRule="evenodd"/><path fill="#000000" d="m365.9591 -0.012477165l218.55322 0l0 251.6984l-218.55322 0z" fillRule="evenodd"/></g></svg>
     );
   } else if(props.name==="upgrade") {
-    return(<svg class="icon" mlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m192.0 408.00012l288.0 -288.0l288.0 288.0l-136.05121 0l0 432.0l-303.89758 0l0 -432.0z" fillRule="evenodd"/></g></svg>);
+    return(<svg className="icon" mlns="http://www.w3.org/2000/svg" viewBox="0.0 0.0 960.0 960.0" fill="none" stroke="none" strokeLinecap="square" strokeMiterlimit="10"><clipPath id="p.0"><path d="m0 0l960.0 0l0 960.0l-960.0 0l0 -960.0z" clipRule="nonzero"/></clipPath><g clipPath="url(#p.0)"><path fill="#000000" fillOpacity="0.0" d="m0 0l960.0 0l0 960.0l-960.0 0z" fillRule="evenodd"/><path fill="#000000" d="m192.0 408.00012l288.0 -288.0l288.0 288.0l-136.05121 0l0 432.0l-303.89758 0l0 -432.0z" fillRule="evenodd"/></g></svg>);
   } else {
     return("Icon: " + props.name);
   }
@@ -774,11 +773,13 @@ class Tree extends React.Component {
     cost = cost ? cost + " XP": "";
     return(
       <>
-        <svg id="tree" viewbox="0 0 100 100">
-          <g>
-            {circles}
-          </g>
-        </svg>
+        <div className="tree-container">
+          <svg id="tree" viewbox="0 0 100 100">
+            <g>
+              {circles}
+            </g>
+          </svg>
+        </div>
         <div className="sidebar">
           <div className="title">{title}</div>
           <div className="body">
@@ -792,9 +793,13 @@ class Tree extends React.Component {
 }
 
 const ExpCounter = props => {
+  const cost = props.cost;
+  const message = cost == -1
+      ? <></>
+      : <span className={cost > props.xp ? "less" : ""}> -{cost}</span>
   return(
     <div className="xp">
-      XP: {props.xp}
+      XP: {props.xp}{message}
     </div>
   );
 };
@@ -806,24 +811,40 @@ class MapSpace extends React.Component {
       timer: null,
       hovered: false,
     }
+    this.upgradeClick = this.upgradeClick.bind(this);
+    this.onHover = this.onHover.bind(this);
+    this.onUnHover = this.onUnHover.bind(this);
   }
 
   componentWillUnmount() {
     if(this.state.timer) clearTimeout(this.state.timer);
   }
 
-  onHover(obj) {
-    obj.setState({
+  onHover() {
+    this.setState({
       hovered: true,
     });
   }
 
-  onUnHover(obj) {
-    obj.setState({
+  onUnHover() {
+    this.setState({
       hovered: false,
     });
   }
 
+  upgradeClick(e) {
+    e.stopPropagation();
+    this.props.upgradeClick();
+    this.upgradeHover(this.props.data["cost"]);
+  }
+
+  upgradeHover(cost) {
+    this.props.hoverCost(cost);
+  }
+
+  upgradeUnHover(cost) {
+    this.props.unHoverCost(cost);
+  }
   render() {
     let className = "space";
     const data = this.props.data;
@@ -843,11 +864,13 @@ class MapSpace extends React.Component {
     return(
       <div
         className={className}
-        onMouseOver={() => {this.onHover(this);}}
-        onMouseOut={() => {this.onUnHover(this);}}
+        onMouseOver={() => {this.onHover();}}
+        onMouseOut={() => {this.onUnHover();}}
         onClick={this.props.onClick} >
         <button
-            onClick={this.props.upgradeClick}
+            onMouseOver={() => {this.upgradeHover(data["cost"]);}}
+            onMouseOut={() => {this.upgradeUnHover(data["cost"]);}}
+            onClick={this.upgradeClick}
             style={{
               visibility: this.state.hovered && controlled
                   ? "visible"
@@ -863,7 +886,7 @@ class MapSpace extends React.Component {
       </div>
     );
   }
-};
+}
 
 class Map extends React.Component {
   constructor(props) {
@@ -888,6 +911,7 @@ class Map extends React.Component {
           iconName: icon,
           iconCode: (iconSkill%2===0 ? "A" : "D") + (iconLevel===0 ? "1" : "0"),
           stat: stat,
+          cost: this.getCost(iconLevel===0 ? 1 : 0),
         };
         row.push(space);
       }
@@ -899,14 +923,18 @@ class Map extends React.Component {
     }
   }
 
-  checkAdjacent(curRow, curCol, nextRow, nextCol, thisRowSpaces, nextRowSpaces) {
+  static checkAdjacent(curRow, curCol, nextRow, nextCol, thisRowSpaces, nextRowSpaces) {
     if(curRow === nextRow) {
       if(Math.abs(curCol-nextCol) === 1) return true;
     } else if (Math.abs(curRow-nextRow) === 1) {
-      console.log(curCol, nextCol);
       if(curCol === nextCol || curCol-thisRowSpaces+nextRowSpaces === nextCol) return true;
     }
     return false;
+  }
+
+  getCost(lvl) {
+    console.log("level: ", lvl);
+    return((lvl+2)*(lvl+1));
   }
 
   concatControlled() {
@@ -918,7 +946,6 @@ class Map extends React.Component {
         }
       });
     });
-    console.log("in map: ", rets);
     this.props.concatDraw(rets);
   }
 
@@ -928,13 +955,18 @@ class Map extends React.Component {
     const lastLevel = toLevel(space["iconCode"]);
     const skill = toSkill(space["iconCode"]);
     if(lastLevel+1 >= Object.keys(cards[skill]).length) return;
-    const data = {
-      iconCode: skill+(lastLevel+1),
-      iconName: cards[skill][lastLevel+1]["name"],
-    };
-    Object.assign(space, data);
-    spaces[row][col] = space;
-    this.setState({spaces: spaces});
+    const cost = this.getCost(lastLevel);
+    if(cost <= this.props.xp) {
+      this.props.incrXP(-1*cost);
+      const data = {
+        iconCode: skill + (lastLevel + 1),
+        iconName: cards[skill][lastLevel + 1]["name"],
+        cost: this.getCost(lastLevel+1),
+      };
+      Object.assign(space, data);
+      spaces[row][col] = space;
+      this.setState({spaces: spaces});
+    }
   }
 
   spaceClick(row, col) {
@@ -959,7 +991,7 @@ class Map extends React.Component {
     });
     let attack = this.props.stats[0];
     attack = attack>this.props.stats[2] ? this.props.stats[2] : attack;
-    if(!this.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
+    if(!Map.checkAdjacent(playerRow, playerCol, row, col, spaces[playerRow].length, spaces[row].length)) {
       spaces[playerRow][playerCol]["playerSpace"] = true;
       return;
     }
@@ -989,6 +1021,8 @@ class Map extends React.Component {
           <MapSpace
             onClick={() => {this.spaceClick(rowConst, colConst);}}
             statsShake={this.props.statsShake}
+            hoverCost={this.props.hoverCost}
+            unHoverCost={this.props.unHoverCost}
             key={(rowInd+1)*(colInd+1)}
             data={col}
             upgradeClick={() => {this.upgradeClick(rowConst, colConst);}}
@@ -1024,6 +1058,10 @@ const NavWindows = props => {
       stats={props.stats}
       statsShake={props.statsShake}
       concatDraw={props.concatDraw}
+      hoverCost={props.hoverCost}
+      unHoverCost={props.unHoverCost}
+      incrXP={props.incrXP}
+      xp={props.xp}
       />
   ];
   const rets = [];
@@ -1044,6 +1082,20 @@ const NavWindows = props => {
   return(<>{rets}</>);
 };
 
+const FullScreen = props => {
+  const [show, setShow] = React.useState(true);
+  const buttonClick = () => {
+    toggleFullScreen();
+    setShow(false);
+  };
+  const style = {visibility: show ? "visible" : "hidden"};
+  return(
+    <div className="fullscreen" style={style}>
+      <button onClick={buttonClick}>Start</button>
+    </div>
+  );
+};
+
 const App = () => {
   const [cardList, setCardList] = React.useState([]);
   const [drawCards, setDraw] = React.useState(['A0', 'D0']);
@@ -1052,6 +1104,7 @@ const App = () => {
   const [skillList, setSkills] = React.useState([]);
   const [xp, setXP] = React.useState(0);
   const [isStatShake, setStatsShake] = React.useState(false);
+  const [upgradeHoverCost, setUpgradeHover] = React.useState(-1);
 
   const incrXP = incr => {
     const newXP = xp+incr;
@@ -1060,16 +1113,13 @@ const App = () => {
   const onDrawClick = (index) => {
     const newCardList = cardList.concat(drawCards[index]);
     let newDrawCards = drawCards;
-    console.log("before: ", newDrawCards, index);
     newDrawCards.splice(index, 1);
-    console.log("after: ", newDrawCards);
     setCardList(newCardList);
     setDraw(newDrawCards);
   };
   const concatDraw = (symbol) => {
     let newDraw = drawCards;
     newDraw = newDraw.concat(symbol);
-    console.log("in app: ", symbol, newDraw);
     setDraw(newDraw);
   };
   const onGroupDelete = (index, symbol) => {
@@ -1093,12 +1143,20 @@ const App = () => {
     setStatsShake(true);
   };
 
+  const hoverCost = cost => {
+    setUpgradeHover(cost);
+  };
+  const unHoverCost = cost => {
+    setUpgradeHover(-1);
+  };
+
   return(
     <>
       <div className="top">
-        <ExpCounter xp={xp} />
+        <ExpCounter xp={xp} cost={upgradeHoverCost}/>
         <NavButtons curTab={curTab} setTab={setTab}/>
       </div>
+      <FullScreen />
       <div className="helix">
         <NavWindows
           curTab={curTab}
@@ -1112,6 +1170,8 @@ const App = () => {
           stats={statsState}
           setPoints={setStats}
           concatDraw={(symbols) => concatDraw(symbols)}
+          hoverCost={hoverCost}
+          unHoverCost={unHoverCost}
         />
       </div>
       <div className="bottom">
@@ -1126,5 +1186,20 @@ const App = () => {
     </>
   );
 };
+
+function toggleFullScreen() {
+  const doc = window.document;
+  const docEl = doc.documentElement;
+
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl);
+  }
+  else {
+    cancelFullScreen.call(doc);
+  }
+}
 
 export default App;
