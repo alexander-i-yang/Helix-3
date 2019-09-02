@@ -191,6 +191,10 @@ const skills = {
     title: "More space",
     icon: "more cards 1",
     description: "Add 3 more tiles to the helix.",
+    ability: {
+      skill: "space",
+      stat: 3,
+    }
   },
   0: {
     data: {
@@ -228,14 +232,25 @@ const skills = {
   1: {
     data: {
       background: "#93c47d",
-      title: "Max stats",
+      title: "Max attack",
       cost: 1,
+      description: "Max Attack +5.",
+      ability: {
+        skill: "maxAtk",
+        stat: 5,
+      }
     },
     0: {
       data: {
         background: "#c0e65f",
         title: "Max defense",
       },
+      0: {
+        data: {
+          background: "#c0e65f",
+          title: "Max defense 2",
+        },
+      }
     },
     1: {
       data: {
@@ -252,7 +267,7 @@ const skills = {
     2: {
       data: {
         background: "#4d9447",
-        title: "Max attack"
+        title: "Max attack 2"
       },
     },
   },
@@ -284,6 +299,11 @@ const skills = {
     data: {
       background: "#6fa8dc",
       title: "More space 2",
+      description: "Add 8 more tiles to the helix.",
+      ability: {
+        skill: "space",
+        stat: 8,
+      }
     },
     0: {
       data: {
@@ -310,7 +330,7 @@ const skills = {
 const utils = {
   range: (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i),
   toRadians: (angle) => angle/180*Math.PI,
-  getCardStats: (level) => Math.pow(2, level)+level,
+  getCardStats: (level) => level*2+1,
 };
 
 class Card extends React.Component {
@@ -413,7 +433,7 @@ const Cards = (props) => {
   };
   const cList = props.cardList;
   let items = [];
-  let addStats = [2, 2, 7, 7];
+  let addStats = [2, 2, props.stats[2], props.stats[3]];
   let groupInds = [];
   for(let i = 0; i<cList.length; ++i) {
     const symbol = cList[i];
@@ -428,10 +448,14 @@ const Cards = (props) => {
       if(level < maxLevel) groupInds.push(i);
     }
   }
-  let len = cList.length;
-  for(let j = 0; j<len; ++j) {
+  let max = props.maxCards;
+  for(let j = 0; j<max; ++j) {
     if(j > groupInds[0]) groupInds.shift();
-    if(groupInds.includes(j)) {
+    if(j >= cList.length) {
+      items.push(
+          <div className="placeholder"></div>
+      );
+    } else if(groupInds.includes(j)) {
       const symbol = cList[j];
       const level = toLevel(symbol);
       const skill = toSkill(symbol);
@@ -483,6 +507,7 @@ class Stats extends Component {
   render() {
     const maxStat = this.props.stat[this.props.pos + 2];
     const curStat = this.props.stat[this.props.pos];
+    console.log("max stats: ", maxStat);
     const name = this.props.name;
     const iconName = name === "attack" ? "sword" : "shield";
 
@@ -699,9 +724,10 @@ class Tree extends React.Component {
     };
   }
 
-  circleClick(cost, title, skillList, setSkills) {
+  circleClick(title, skill, stat, skillList, setSkills) {
     let temp = skillList;
     temp.push(title);
+    this.props.resolveSkill(skill, stat);
     this.setState({test: "test again"});
     setSkills(temp);
   }
@@ -728,6 +754,10 @@ class Tree extends React.Component {
       const ind = i - (len-1)/2.0;
       this.makeTree(circles, distance+60, layer[""+i], ind, len, angle, newRange, skillList, setSkills, status===2, xp, incrXP);
     }
+    const skillData = data["ability"];
+    const skill = skillData ? skillData["skill"] : "none";
+    const stat = skillData ? skillData["stat"] : 0;
+
     circles.push(
       <TreeCicle
         //TODO: add keys
@@ -752,7 +782,7 @@ class Tree extends React.Component {
         onClick={
           () => {
             if(status === 1) {
-              this.circleClick(cost, data["title"], skillList, setSkills);
+              this.circleClick(data["title"], skill, stat, skillList, setSkills);
               incrXP(-1*cost);
             }
           }
@@ -1048,12 +1078,17 @@ const NavWindows = props => {
       skillList={props.skillList}
       setSkills={props.setSkills}
       incrXP={props.incrXP}
-      xp={props.xp}/>,
+      xp={props.xp}
+      resolveSkill={props.resolveSkill}
+    />,
     <Cards
       cardList={props.cardList}
       onGroupDelete={props.onGroupDelete}
       setPoints={setCardStats}
-      incrXP={props.incrXP} />,
+      stats={props.stats}
+      incrXP={props.incrXP}
+      maxCards={props.maxCards}
+    />,
     <Map
       stats={props.stats}
       statsShake={props.statsShake}
@@ -1105,12 +1140,14 @@ const App = () => {
   const [xp, setXP] = React.useState(0);
   const [isStatShake, setStatsShake] = React.useState(false);
   const [upgradeHoverCost, setUpgradeHover] = React.useState(-1);
+  const [maxCards, setMaxCards] = React.useState(5);
 
   const incrXP = incr => {
     const newXP = xp+incr;
     setXP(newXP);
   };
   const onDrawClick = (index) => {
+    if(cardList.length === maxCards) return;
     const newCardList = cardList.concat(drawCards[index]);
     let newDrawCards = drawCards;
     newDrawCards.splice(index, 1);
@@ -1137,6 +1174,7 @@ const App = () => {
       j++;
     });
     setStatsState(temp);
+    console.log("stats state: ", statsState);
   };
 
   const statsShake = () => {
@@ -1150,6 +1188,14 @@ const App = () => {
     setUpgradeHover(-1);
   };
 
+  const resolveSkill = (skill, stat) => {
+    if(skill === "space") setMaxCards(maxCards+stat);
+    else if(skill === "maxAtk") {
+      let tempStats = [statsState[0], statsState[1], statsState[3], statsState[3]];
+      tempStats[2] += stat;
+      setStats(tempStats);
+    }
+  };
   return(
     <>
       <div className="top">
@@ -1172,6 +1218,8 @@ const App = () => {
           concatDraw={(symbols) => concatDraw(symbols)}
           hoverCost={hoverCost}
           unHoverCost={unHoverCost}
+          maxCards={maxCards}
+          resolveSkill={resolveSkill}
         />
       </div>
       <div className="bottom">

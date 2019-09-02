@@ -252,6 +252,14 @@ button {
   }
 }
 
+.placeholder {
+  border: 3px solid #ffffff30;
+  width: 55px;
+  height: 55px;
+  border-radius: 5px;
+  margin-right: 20px;
+}
+
 .shake {
   animation: shake 0.9s forwards ease-in-out;
   transition: all 0.9s;
@@ -327,6 +335,11 @@ svg.icon {
   .draw {
     & .card {
       margin-left: 2vh;
+    }
+  }
+  .cards {
+    & .connector {
+      width: 3vh;
     }
   }
   & .map {
