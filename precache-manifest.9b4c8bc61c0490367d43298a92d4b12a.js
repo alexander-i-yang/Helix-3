@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "a0bc58c28087f75599f6f822aa767c44",
+    "revision": "935e7497ea786b1d43e2da74f4189ac7",
     "url": "/Helix-3/index.html"
   },
   {
