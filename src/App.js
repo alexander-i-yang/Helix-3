@@ -507,7 +507,6 @@ class Stats extends Component {
   render() {
     const maxStat = this.props.stat[this.props.pos + 2];
     const curStat = this.props.stat[this.props.pos];
-    console.log("max stats: ", maxStat);
     const name = this.props.name;
     const iconName = name === "attack" ? "sword" : "shield";
 
@@ -549,14 +548,18 @@ function toScale(level) {return(1+level*0.1);}
 const CardDraw = (props) => {
   const cards = props.cards;
   return (
-    utils.range(0, cards.length-1).map((cardId) => {
-      const symbol = cards[cardId];
+    utils.range(0, props.maxDraw-1).map((cardId) => {
+      const symbol = cards[cardId-props.maxDraw+cards.length];
+      if(props.maxDraw - cards.length > cardId) {
+        return (<div key={cardId} className="placeholder"></div>);
+      }
+      console.log(cards, cardId, props.maxDraw, cards.length);
       return(
         <Card
           key={cardId}
           skill={toSkill(symbol)}
           level={toLevel(symbol)}
-          onClick={() => {props.onClick(cardId);}}/>
+          onClick={() => {props.onClick(cardId-props.maxDraw+cards.length);}}/>
       );
     })
   );
@@ -963,7 +966,6 @@ class Map extends React.Component {
   }
 
   getCost(lvl) {
-    console.log("level: ", lvl);
     return((lvl+2)*(lvl+1));
   }
 
@@ -1141,6 +1143,7 @@ const App = () => {
   const [isStatShake, setStatsShake] = React.useState(false);
   const [upgradeHoverCost, setUpgradeHover] = React.useState(-1);
   const [maxCards, setMaxCards] = React.useState(5);
+  const [maxDraw, setMaxDraw] = React.useState(5);
 
   const incrXP = incr => {
     const newXP = xp+incr;
@@ -1155,6 +1158,7 @@ const App = () => {
     setDraw(newDrawCards);
   };
   const concatDraw = (symbol) => {
+    if(drawCards.length >= maxCards) return;
     let newDraw = drawCards;
     newDraw = newDraw.concat(symbol);
     setDraw(newDraw);
@@ -1174,7 +1178,6 @@ const App = () => {
       j++;
     });
     setStatsState(temp);
-    console.log("stats state: ", statsState);
   };
 
   const statsShake = () => {
@@ -1228,7 +1231,7 @@ const App = () => {
           <Stats name="defense" stat={statsState} pos={1} />
         </div>
         <div className="draw">
-          <CardDraw cards={drawCards} onClick={onDrawClick}/>
+          <CardDraw cards={drawCards} onClick={onDrawClick} maxDraw={maxDraw}/>
         </div>
       </div>
     </>

@@ -153,6 +153,7 @@ body {
     margin-left: 10px;
     &:hover {transform: scale(1.1);}
   }
+  & .placeholder {margin-left: 10px; margin-right: 0;}
 }
 
 .group {
@@ -177,8 +178,7 @@ body {
   box-shadow: 0 0 3px 3px transparent;
   transition: all 0.2s;
   & svg {
-    margin: 15px;
-    //width: 25px; height: 25px;
+    margin: 2vh;
   }
 }
 
@@ -254,8 +254,8 @@ button {
 
 .placeholder {
   border: 3px solid #ffffff30;
-  width: 55px;
-  height: 55px;
+  width: 8vh;
+  height: 8vh;
   border-radius: 5px;
   margin-right: 20px;
 }
@@ -282,8 +282,8 @@ button {
 }
 
 svg.icon {
-  width: 25px;
-  height: 25px;
+  width: 4vh;
+  height: 4vh;
   & path {fill: white;}
   &.fillRed path {fill:red;}
   &.threeShield path {fill:black;}
@@ -304,7 +304,7 @@ svg.icon {
     padding: 1vh;
     &.helix {overflow: hidden; padding: 0;}
   }
-  div.card {padding: 0.1vh; border-radius: 1.5vh;}
+  div.card {padding: 0.1vh; border-radius: 1vh;}
   button.icon {padding: 1vh; border-top-left-radius: 1.5vh; border-top-right-radius: 1.5vh;}
   .tree-container {overflow:auto; width: 50vh; height: 50vh;}
   .stats svg.icon {
@@ -335,7 +335,19 @@ svg.icon {
   .draw {
     & .card {
       margin-left: 2vh;
+      width: 11vh;
+      height: 11vh;
     }
+    & .placeholder {
+      margin-left: 2vh;
+      min-width: 11vh;
+      width: 11vh;
+      height: 11vh;
+    }
+  }
+  .placeholder {
+    border-radius: 1vh;
+    border-width: 1vh;
   }
   .cards {
     & .connector {
